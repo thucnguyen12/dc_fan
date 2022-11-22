@@ -102,27 +102,6 @@ void SysTick_Handler(void)
     xSystem_para_now.Tick.Tick_200ms++;
 }
 
-void EINTA_IRQHandler(void){
-	// Start a bit with Low level
-#warning "xu li tin hieu remote"
-	if(IR_REMOTE_READ==0)
-    {
-//		if(IRTimeOut>0){
-//			IRHigh[IR_ClkHigh++]=HighSide;
-//		}else {
-//			// Bit Start Frame
-//			IR_ClkLow = IR_ClkHigh=0;
-//		}
-//		LowSide=0;
-//		IRTimeOut=50;
-//	}
-//	else {
-//		IRLow[IR_ClkLow++]=LowSide;
-//		HighSide=0; 
-	}
-	
-	EINT_ClearIntFlag(EINT_PORT_A);
-}
 
 /*!
  * @brief       This function handles ADC exception

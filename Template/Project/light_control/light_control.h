@@ -8,6 +8,7 @@
 #include "Hardware.h"
 #include "apm32f00x_tmr2.h"
 
-
+void Light_PWM_Init(void);
+void Light_SetDuty(uint8_t	Duty);
 
 #endif

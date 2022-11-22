@@ -2,7 +2,7 @@
 
 #define Light_MaxCount	200
 
-void LED_PWM_Init(void)
+void Light_PWM_Init(void)
 {
 	TMR2_OCConfig_T  ocConfigStruct;
 	
@@ -20,7 +20,8 @@ void LED_PWM_Init(void)
 	TMR2_Enable();
 }
 
-void LED_SetDuty(uint8_t	Duty){
-	uint32_t	Value = (uint32_t)Light_MaxCount * (uint32_t)Duty / 100;
+void Light_SetDuty(uint8_t	Duty)
+{
+	uint32_t Value = (uint32_t)Light_MaxCount * (uint32_t)Duty / 100;
 	TMR2_SetCompareCapture(LIGHT_PWM_CH,Value);
 }

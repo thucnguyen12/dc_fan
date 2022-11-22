@@ -12,7 +12,7 @@ typedef enum{
     speed_off = 0,
 	low_spd = 1,
 	high_spd = 2,
-    nalture_spd = 3
+    nature_spd = 3
 } speed_type;
 
 typedef struct{
@@ -27,6 +27,8 @@ typedef struct
 {
     uint8_t level;
     uint8_t delay_scan;
+    uint8_t thresh;
+    uint8_t clk_cnt;
 } button_t;
 
 typedef struct

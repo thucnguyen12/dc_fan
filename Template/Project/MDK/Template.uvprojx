@@ -52,7 +52,7 @@
           <OutputName>Template</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
-          <CreateHexFile>0</CreateHexFile>
+          <CreateHexFile>1</CreateHexFile>
           <DebugInformation>1</DebugInformation>
           <BrowseInformation>1</BrowseInformation>
           <ListingPath>.\Listings\</ListingPath>
@@ -339,7 +339,7 @@
               <MiscControls></MiscControls>
               <Define></Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\Include;..\..\..\Library\Device\Geehy\APM32F00x\Include;..\..\..\Library\CMSIS\Include;..\..\..\Library\APM32F00x_StdPeriphDriver\inc;..\gpio</IncludePath>
+              <IncludePath>..\..\Include;..\..\..\Library\Device\Geehy\APM32F00x\Include;..\..\..\Library\CMSIS\Include;..\..\..\Library\APM32F00x_StdPeriphDriver\inc;..\gpio;..\ADC;..\light_control;..\motor_control;..\IR</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -567,6 +567,21 @@
               <FileName>light_control.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\light_control\light_control.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>IR_handler</GroupName>
+          <Files>
+            <File>
+              <FileName>IR_Handler.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\IR\IR_Handler.c</FilePath>
+            </File>
+            <File>
+              <FileName>IR_Handler.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\IR\IR_Handler.h</FilePath>
             </File>
           </Files>
         </Group>

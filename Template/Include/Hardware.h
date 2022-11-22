@@ -39,7 +39,7 @@
 #define		LED_LOW_SPD_GPIO    GPIOD
 
 #define 	LED_HIGH_SPD_PIN	GPIO_PIN_1		// Led High Speed
-#define		LED_HIGH_GPIO		GPIOD
+#define		LED_HIGH_SPD_GPIO	GPIOD
 
 #define 	LED_NATURAL_PIN		GPIO_PIN_7		// Led Neuture Speed
 #define		LED_NATURAL_GPIO	GPIOC		

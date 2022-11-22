@@ -54,7 +54,7 @@ void ADCInit(void)
 void ADCIsr(void){
     if(ADC_ReadIntFlag(ADC_INT_FLAG_CC) == SET){
         ADC_ClearIntFlag(ADC_INT_FLAG_CC);
-        xSystem_para_now.Vbat = ADC_ReadData();
+        xSystem_para_now.Vbat = ADC_ReadData() * 5000 / 4095; // Vbat by mV
     }
 }
 

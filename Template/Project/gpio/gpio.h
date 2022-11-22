@@ -12,4 +12,12 @@
 
 void gpio_init (void);
 
+void turn_off_led (GPIO_T* port, uint8_t pin);
+
+void turn_on_led (GPIO_T* port, uint8_t pin);
+
+void toggle_led (GPIO_T* port, uint8_t pin);
+
+void turn_off_leds_speed (void);
+
 #endif

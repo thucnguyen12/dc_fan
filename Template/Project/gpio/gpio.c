@@ -36,6 +36,7 @@ void gpio_init (void)
     gpioConfig.pin 		= SWING_PIN;
 
     GPIO_Config(SWING_GPIO, &gpioConfig);
+    GPIO_ClearBit(SWING_GPIO, SWING_PIN);
     
     //swing led ctrl
     gpioConfig.mode 	= GPIO_MODE_OUT_PP;
@@ -63,7 +64,7 @@ void gpio_init (void)
     gpioConfig.speed 	= GPIO_SPEED_10MHz;
     gpioConfig.pin 		= LED_HIGH_SPD_PIN;
 
-    GPIO_Config(LED_HIGH_GPIO, &gpioConfig);
+    GPIO_Config(LED_HIGH_SPD_GPIO, &gpioConfig);
     
     //led nature speed ctrl
     gpioConfig.mode 	= GPIO_MODE_OUT_PP;
@@ -120,3 +121,24 @@ void gpio_deinit_in_sleep_mode (void)
 {
 }
 
+void turn_off_led (GPIO_T* port, uint8_t pin)
+{
+    GPIO_ClearBit(port, pin);
+}
+
+void turn_on_led (GPIO_T* port, uint8_t pin)
+{
+     GPIO_SetBit(port, pin);
+}
+
+void toggle_led (GPIO_T* port, uint8_t pin)
+{
+    GPIO_Toggle (port, pin);
+}
+
+void turn_off_leds_speed (void)
+{
+    turn_off_led (LED_LOW_SPD_GPIO, LED_LOW_SPD_PIN);
+    turn_off_led (LED_HIGH_SPD_GPIO, LED_HIGH_SPD_PIN);
+    turn_off_led (LED_NATURAL_GPIO, LED_NATURAL_PIN);
+}
