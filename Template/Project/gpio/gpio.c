@@ -119,6 +119,10 @@ void gpio_init (void)
 
 void gpio_deinit_in_sleep_mode (void)
 {
+    turn_off_leds_speed();
+    GPIO_ClearBit (SWING_GPIO, SWING_PIN);
+    turn_off_led (LED_SWING_GPIO, LED_SWING_PIN);
+   
 }
 
 void turn_off_led (GPIO_T* port, uint8_t pin)

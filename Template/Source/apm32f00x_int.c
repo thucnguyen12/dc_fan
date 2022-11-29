@@ -100,6 +100,7 @@ void SysTick_Handler(void)
     xSystem_para_now.Tick.Tick_100ms++;
     xSystem_para_now.Tick.Tick_1000ms++;
     xSystem_para_now.Tick.Tick_200ms++;
+    xSystem_para_now.Tick.Tick_10ms++;
 }
 
 

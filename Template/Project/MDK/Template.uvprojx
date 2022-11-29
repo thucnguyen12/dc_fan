@@ -339,7 +339,7 @@
               <MiscControls></MiscControls>
               <Define></Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\Include;..\..\..\Library\Device\Geehy\APM32F00x\Include;..\..\..\Library\CMSIS\Include;..\..\..\Library\APM32F00x_StdPeriphDriver\inc;..\gpio;..\ADC;..\light_control;..\motor_control;..\IR</IncludePath>
+              <IncludePath>..\..\Include;..\..\..\Library\Device\Geehy\APM32F00x\Include;..\..\..\Library\CMSIS\Include;..\..\..\Library\APM32F00x_StdPeriphDriver\inc;..\gpio;..\ADC;..\light_control;..\motor_control;..\IR;..\uart</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -582,6 +582,21 @@
               <FileName>IR_Handler.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\IR\IR_Handler.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>UART_handler</GroupName>
+          <Files>
+            <File>
+              <FileName>uart.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\uart\uart.c</FilePath>
+            </File>
+            <File>
+              <FileName>uart.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\uart\uart.h</FilePath>
             </File>
           </Files>
         </Group>

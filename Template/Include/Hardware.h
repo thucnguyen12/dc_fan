@@ -87,7 +87,7 @@
 
 #define LOW_SPEED_DUTY      30
 #define HIGH_SPEED_DUTY     80
-#define NATURE_LOW_DUTY     20
+#define NATURE_LOW_DUTY     40
 #define NATURE_HIGH_DUTY    85
 
 #define LOW_LIGHT_DUTY      10

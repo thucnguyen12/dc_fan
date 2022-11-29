@@ -42,6 +42,10 @@ void DC_SetDuty(uint8_t	Duty){
         TMR2_SetCompareCapture(FAN_PWM_CH,Value);
         TMR2_EnableCompareCapture(FAN_PWM_CH);
     }
+    else
+    {
+        TMR2_DisableCompareCapture(FAN_PWM_CH);
+    }
 //	if(Value>0 && xSystem.IsLowBat==0 )  TMR2_EnableCompareCapture(FAN_PWM_CH);
 }
 

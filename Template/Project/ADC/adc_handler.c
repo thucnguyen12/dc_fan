@@ -1,6 +1,35 @@
 #include "adc_handler.h"
 
 
+void ADCCalibration(void)
+{
+    uint8_t i;
+    int8_t offset = 0;
+    uint16_t adcData = 0;
+    
+    ADC_SetOffset(0);
+    ADC_EnableCompensation();
+    ADC_ClearStatusFlag(ADC_FLAG_CC);
+    ADC_Enable();
+    ADC_StartConversion();
+    
+    for(i = 0; i < 10; i++)
+    {
+        while(ADC_ReadStatusFlag(ADC_FLAG_CC) == RESET);
+        ADC_ClearStatusFlag(ADC_FLAG_CC);
+    }
+    ADC_Disable();
+    
+    adcData = ADC_ReadData();    
+    offset = (int8_t)(0x800 - adcData);
+    ADC_SetOffset(offset);
+    
+    ADC_DisableCompensation();
+    ADC_ClearStatusFlag(ADC_FLAG_CC);
+}
+
+
+
 /*!
  * @brief       ADC Init   
  *
@@ -29,10 +58,11 @@ void ADCInit(void)
     adcConfig.convMode = ADC_CONV_MODE_CONTINUOUS;
     adcConfig.interrupt = ADC_INT_CC;
 	adcConfig.div = ADC_DIV_12;
+    adcConfig.dataAlign = ADC_DATA_ALIGN_RIGHT;
     ADC_Config(&adcConfig);
 
-    /** ADC Calibration 
-    ADCCalibration();*/
+    /** ADC Calibration */
+    ADCCalibration();
 
 //	adcConfig.convMode = ADC_CONV_MODE_SINGLE;
 //    ADC_Config(&adcConfig);
@@ -54,7 +84,7 @@ void ADCInit(void)
 void ADCIsr(void){
     if(ADC_ReadIntFlag(ADC_INT_FLAG_CC) == SET){
         ADC_ClearIntFlag(ADC_INT_FLAG_CC);
-        xSystem_para_now.Vbat = ADC_ReadData() * 5000 / 4095; // Vbat by mV
+        xSystem_para_now.Vbat = ADC_ReadData(); // Vbat by mV
     }
 }
 
