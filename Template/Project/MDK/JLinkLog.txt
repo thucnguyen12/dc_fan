@@ -1,0 +1,102 @@
+T0B7C 008:003.008   SEGGER J-Link V7.82d Log File
+T0B7C 008:003.042   DLL Compiled: Nov 23 2022 16:03:45
+T0B7C 008:003.048   Logging started @ 2022-11-30 04:00
+T0B7C 008:003.051 - 17.445ms
+T0B7C 008:003.057 JLINK_SetWarnOutHandler(...)
+T0B7C 008:003.061 - 0.005ms
+T0B7C 008:003.066 JLINK_OpenEx(...)
+T0B7C 008:003.885   Firmware: J-Link V9 compiled May  7 2021 16:26:12
+T0B7C 008:004.149   Firmware: J-Link V9 compiled May  7 2021 16:26:12
+T0B7C 008:004.273   Decompressing FW timestamp took 112 us
+T0B7C 008:010.075   Hardware: V9.60
+T0B7C 008:010.085   S/N: 69663106
+T0B7C 008:010.091   OEM: SEGGER
+T0B7C 008:010.097   Feature(s): RDI, GDB, FlashDL, FlashBP, JFlash
+T0B7C 008:011.009   TELNET listener socket opened on port 19021
+T0B7C 008:015.642   WEBSRV WEBSRV_Init(): Starting webserver thread(s)
+T0B7C 008:015.731   WEBSRV Webserver running on local port 19080
+T0B7C 008:018.881 - 15.822ms returns "O.K."
+T0B7C 008:018.898 JLINK_GetEmuCaps()
+T0B7C 008:018.921 - 0.024ms returns 0xB9FF7BBF
+T0B7C 008:018.926 JLINK_TIF_GetAvailable(...)
+T0B7C 008:019.076 - 0.152ms
+T0B7C 008:019.084 JLINK_SetErrorOutHandler(...)
+T0B7C 008:019.089 - 0.005ms
+T0B7C 008:019.114 JLINK_ExecCommand("ProjectFile = "D:\project_cty\dieu khien quat\Code\Template\Project\MDK\JLinkSettings.ini"", ...). 
+T0B7C 008:020.028 - 0.918ms returns 0x00
+T0B7C 008:020.061 JLINK_ExecCommand("Device = APM32F003F6", ...). 
+T0B7C 008:020.151   Flash bank @ 0x1FFFF800: SFL: Parsing sectorization info from ELF file
+T0B7C 008:020.158     FlashDevice.SectorInfo[0]: .SectorSize = 0x00000010, .SectorStartAddr = 0x00000000
+T0B7C 008:020.164   OFL: Init() N/A
+T0B7C 008:020.170   OFL: UnInit() N/A
+T0B7C 008:020.176   OFL: EraseSector() N/A
+T0B7C 008:020.182   OFL: ProgramPage() N/A
+T0B7C 008:020.188   OFL: EraseChip() N/A
+T0B7C 008:020.194   OFL: BlankCheck() N/A
+T0B7C 008:020.200   OFL: Verify() N/A
+T0B7C 008:020.206   OFL: SEGGER_FL_Erase() present @ offset 0x00000191
+T0B7C 008:020.212   OFL: SEGGER_FL_Program() present @ offset 0x0000012D
+T0B7C 008:020.218   OFL: SEGGER_FL_Read() N/A
+T0B7C 008:020.224   OFL: SEGGER_OPEN_Read() N/A
+T0B7C 008:020.230   OFL: SEGGER_FL_CalcCRC() present @ offset 0x000001B9
+T0B7C 008:020.236   OFL: SEGGER_FL_Start() present @ offset 0x000001D1
+T0B7C 008:020.242   OFL: SEGGER_FL_GetFlashInfo() N/A
+T0B7C 008:020.248   OFL: SEGGER_OPEN_GetFlashInfo() N/A
+T0B7C 008:020.254   OFL: SEGGER_FL_Verify() present @ offset 0x00000089
+T0B7C 008:020.260   OFL: SEGGER_FL_CheckBlank() present @ offset 0x000001A5
+T0B7C 008:020.266   OFL: SEGGER_FL_Prepare() present @ offset 0x000000B5
+T0B7C 008:020.272   OFL: SEGGER_FL_Restore() present @ offset 0x00000111
+T0B7C 008:020.278   OFL: SEGGER_FL_EraseChip() N/A
+T0B7C 008:020.289   Device "APM32F003F6" selected.
+T0B7C 008:020.409 - 0.346ms returns 0x00
+T0B7C 008:020.420 JLINK_ExecCommand("DisableConnectionTimeout", ...). 
+T0B7C 008:020.445 - 0.003ms returns 0x01
+T0B7C 008:020.453 JLINK_GetHardwareVersion()
+T0B7C 008:020.457 - 0.005ms returns 96000
+T0B7C 008:020.478 JLINK_GetDLLVersion()
+T0B7C 008:020.482 - 0.005ms returns 78204
+T0B7C 008:020.488 JLINK_GetOEMString(...)
+T0B7C 008:020.493 JLINK_GetFirmwareString(...)
+T0B7C 008:020.497 - 0.005ms
+T0B7C 008:020.504 JLINK_GetDLLVersion()
+T0B7C 008:020.508 - 0.005ms returns 78204
+T0B7C 008:020.515 JLINK_GetCompileDateTime()
+T0B7C 008:020.519 - 0.005ms
+T0B7C 008:020.805 JLINK_GetFirmwareString(...)
+T0B7C 008:020.810 - 0.006ms
+T0B7C 008:020.816 JLINK_GetHardwareVersion()
+T0B7C 008:020.820 - 0.005ms returns 96000
+T0B7C 008:020.825 JLINK_GetSN()
+T0B7C 008:020.829 - 0.005ms returns 69663106
+T0B7C 008:020.834 JLINK_GetOEMString(...)
+T0B7C 008:020.840 JLINK_TIF_Select(JLINKARM_TIF_SWD)
+T0B7C 008:021.359 - 0.522ms returns 0x00
+T0B7C 008:021.367 JLINK_HasError()
+T0B7C 008:021.372 JLINK_SetSpeed(5000)
+T0B7C 008:021.432 - 0.063ms
+T0B7C 008:021.626 JLINK_HasError()
+T0B7C 008:021.634 JLINK_SetResetType(JLINKARM_RESET_TYPE_NORMAL)
+T0B7C 008:021.638 - 0.006ms returns JLINKARM_RESET_TYPE_NORMAL
+T0B7C 008:021.643 JLINK_Reset()
+T0B7C 008:021.820   InitTarget() start
+T0B7C 008:021.829    J-Link Script File: Executing InitTarget()
+T0B7C 008:122.779   Check if Flash is read protected.
+T0B7C 008:125.621   
+Flash is read protected.
+T0B7C 008:125.678   Read or Write protection is active in Geehy APM32xx device.
+For Flash programming the device needs to allow memory read.
+T0B7C 008:125.684   Executing default behavior previously saved in the registry.
+T0B7C 008:125.690   Device will be unsecured now.
+T0B7C 008:125.697   Read protection disabled.
+T0B7C 068:023.389   InitTarget() end
+T0B7C 068:023.407   Connect failed. Resetting via Reset pin and trying again.
+T0B7C 068:084.696   InitTarget() start
+T0B7C 068:084.708    J-Link Script File: Executing InitTarget()
+T0B7C 068:185.689   Check if Flash is read protected.
+T0B7C 068:188.453   
+Flash is read protected.
+T0B7C 068:188.527   Read or Write protection is active in Geehy APM32xx device.
+For Flash programming the device needs to allow memory read.
+T0B7C 068:188.533   Executing default behavior previously saved in the registry.
+T0B7C 068:188.539   Device will be unsecured now.
+T0B7C 068:188.546   Read protection disabled.

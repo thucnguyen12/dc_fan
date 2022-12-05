@@ -44,11 +44,11 @@
 #define 	LED_NATURAL_PIN		GPIO_PIN_7		// Led Neuture Speed
 #define		LED_NATURAL_GPIO	GPIOC		
 
-#define 	LED_CHARG_PIN		GPIO_PIN_2		// Led Charge
-#define		LED_CHARG_GPIO		GPIOA
+#define 	LED_CHARG_AND_LOWBAT_PIN		GPIO_PIN_2		// Led Charge
+#define		LED_CHARG_AND_LOWBAT_GPIO		GPIOA
 
-#define 	LED_LOWBAT_PIN		GPIO_PIN_6		// Led Battery Low
-#define		LED_LOWBAT_GPIO		GPIOD
+#define 	LED_FULLBAT_PIN		GPIO_PIN_6		// Led Battery Low
+#define		LED_FULLBAT_GPIO    GPIOD
 
 #define 	BT1_PIN			    GPIO_PIN_3		// BT 1 => FAN Speed
 #define		BT1_GPIO		    GPIOC
@@ -85,7 +85,7 @@
 #define POWERIN_ADC_PIN    GPIO_PIN_4
 
 
-#define LOW_SPEED_DUTY      30
+#define LOW_SPEED_DUTY      40
 #define HIGH_SPEED_DUTY     80
 #define NATURE_LOW_DUTY     40
 #define NATURE_HIGH_DUTY    85

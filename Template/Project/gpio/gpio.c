@@ -76,16 +76,16 @@ void gpio_init (void)
     //led charging
     gpioConfig.mode 	= GPIO_MODE_OUT_PP;
     gpioConfig.speed 	= GPIO_SPEED_10MHz;
-    gpioConfig.pin 		= LED_CHARG_PIN;
+    gpioConfig.pin 		= LED_CHARG_AND_LOWBAT_PIN;
 
-    GPIO_Config(LED_CHARG_GPIO, &gpioConfig);
+    GPIO_Config(LED_CHARG_AND_LOWBAT_GPIO, &gpioConfig);
     
     //led low battery
     gpioConfig.mode 	= GPIO_MODE_OUT_PP;
     gpioConfig.speed 	= GPIO_SPEED_10MHz;
-    gpioConfig.pin 		= LED_LOWBAT_PIN;
+    gpioConfig.pin 		= LED_FULLBAT_PIN;
 
-    GPIO_Config(LED_LOWBAT_GPIO, &gpioConfig);
+    GPIO_Config(LED_FULLBAT_GPIO, &gpioConfig);
     
     // button 1
     gpioConfig.mode     = GPIO_MODE_IN_FLOATING;

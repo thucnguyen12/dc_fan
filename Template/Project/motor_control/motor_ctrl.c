@@ -20,7 +20,8 @@ void DC_Moto_Init(void)
 	// 24Mhz / 3 / 100 = 
 	
 	TMR2_ConfigTimerBase(2, DC_MaxCount);	// 1Mhz clock, 1000Hz
-	
+	//3.3kHz
+    
 	// PWM for DC-moto
 	ocConfigStruct.channel 			= FAN_PWM_CH;
 	ocConfigStruct.mode 			= TMR2_OC_MODE_PWM1;
