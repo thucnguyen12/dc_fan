@@ -29,6 +29,7 @@ typedef struct
     uint8_t delay_scan;
     uint8_t thresh;
     uint8_t clk_cnt;
+    uint8_t last_state;
 } button_t;
 
 typedef struct

@@ -85,8 +85,8 @@
 #define POWERIN_ADC_PIN    GPIO_PIN_4
 
 
-#define LOW_SPEED_DUTY      40
-#define HIGH_SPEED_DUTY     80
+#define LOW_SPEED_DUTY      43
+#define HIGH_SPEED_DUTY     72
 #define NATURE_LOW_DUTY     40
 #define NATURE_HIGH_DUTY    85
 

@@ -266,7 +266,7 @@ int main(void)
 void scan_button_on_board (void)
 {
     //scan button 1
-    if((BT1_READ != 0) && (xSystem_para_now.BT1.delay_scan == 0))
+    if((BT1_READ != 0) && (xSystem_para_now.BT1.delay_scan == 0) && (xSystem_para_now.BT1.last_state == 0))
     {
         if(xSystem_para_now.BT1.clk_cnt++ > xSystem_para_now.BT1.thresh)
         {
@@ -274,32 +274,38 @@ void scan_button_on_board (void)
             xSystem_para_now.BT1.delay_scan = 1;
             xSystem_para_now.BT1.level = 1;
             xSystem_para_now.BT1.clk_cnt = 0;
+            xSystem_para_now.BT1.last_state = BT1_READ;
         }
     }
     else
     {
         if (xSystem_para_now.BT1.delay_scan)
-           xSystem_para_now.BT1.delay_scan--; 
+           xSystem_para_now.BT1.delay_scan--;
+        if (BT1_READ != xSystem_para_now.BT1.last_state)
+           xSystem_para_now.BT1.last_state = BT1_READ;
     }
     
     //scan button 2
-    if((BT2_READ != 0) && (xSystem_para_now.BT2.delay_scan == 0))
+    if((BT2_READ != 0) && (xSystem_para_now.BT2.delay_scan == 0) && (xSystem_para_now.BT2.last_state == 0))
     {
         if(xSystem_para_now.BT2.clk_cnt++ > xSystem_para_now.BT2.thresh)
         {
             xSystem_para_now.BT2.delay_scan = 1;
             xSystem_para_now.BT2.level = 1;
             xSystem_para_now.BT2.clk_cnt = 0;
+            xSystem_para_now.BT2.last_state = BT2_READ;
         }
     }
     else
     {
         if (xSystem_para_now.BT2.delay_scan)
-           xSystem_para_now.BT2.delay_scan--; 
+           xSystem_para_now.BT2.delay_scan--;
+        if (BT2_READ != xSystem_para_now.BT2.last_state)
+           xSystem_para_now.BT2.last_state = BT2_READ;
     }
     
     //scan button 3
-    if((BT3_READ != 0) && (xSystem_para_now.BT3.delay_scan == 0))
+    if((BT3_READ != 0) && (xSystem_para_now.BT3.delay_scan == 0) && (xSystem_para_now.BT3.last_state == 0))
     {
         if(xSystem_para_now.BT3.clk_cnt++ > xSystem_para_now.BT3.thresh)
         {
@@ -307,12 +313,15 @@ void scan_button_on_board (void)
             xSystem_para_now.BT3.delay_scan = 1;
             xSystem_para_now.BT3.level = 1;
             xSystem_para_now.BT3.clk_cnt = 0;
+            xSystem_para_now.BT3.last_state = BT3_READ;
         }
     }
     else
     {
         if (xSystem_para_now.BT3.delay_scan)
-           xSystem_para_now.BT3.delay_scan--; 
+           xSystem_para_now.BT3.delay_scan--;
+        if (BT3_READ != xSystem_para_now.BT3.last_state)
+           xSystem_para_now.BT3.last_state = BT3_READ;
     }
 }
 
@@ -506,20 +515,21 @@ void Tick_1000ms_check_power (void)
             
         }
         
-        if (mVolOfBat > 1400 && (xSystem_para_now.is_charging == 1)) // if v >14.4 and plug in
+        if (mVolOfBat > 1420 && (xSystem_para_now.is_charging == 1)) // if v >14.4 and plug in
         {
             if (PWRIN_READ != 0)
             {
                 if(++ClkFullBat > 20) {
                     if(ClkFullBat > 25) 
                         ClkFullBat = 25;
+//                    UPrintf (USART1, " BATERRY IS FULL NOW\r\n");
                     xSystem_para_now.is_charging = 0; // BATERRY IS FULL
                     turn_off_led (LED_CHARG_AND_LOWBAT_GPIO, LED_CHARG_AND_LOWBAT_PIN);
                     turn_on_led (LED_FULLBAT_GPIO, LED_FULLBAT_PIN); //LED GREEN INDICATE FULL BAT ALWAYS ON
                 }
             }
         }
-        else
+        else if (mVolOfBat < 1420)
         {
             if (ClkFullBat > 0)
             {
@@ -527,6 +537,7 @@ void Tick_1000ms_check_power (void)
                 {
                     if (PWRIN_READ != 0)
                     {
+//                        UPrintf(USART1,"PLUG IN AND BATERRY IS NOT FULL!\r\n");
                         xSystem_para_now.is_charging = 1; // PLUG IN AND BATERRY IS NOT FULL
                         turn_off_led (LED_FULLBAT_GPIO, LED_FULLBAT_PIN);
                         turn_on_led (LED_CHARG_AND_LOWBAT_GPIO, LED_CHARG_AND_LOWBAT_PIN);
@@ -548,7 +559,7 @@ void Tick_1000ms_check_power (void)
         turn_on_led (LED_CHARG_AND_LOWBAT_GPIO, LED_CHARG_AND_LOWBAT_PIN);
         xSystem_para_now.is_charging = 1;
         last_power_in = 1;
-//        UPrintf(USART1,"\rPWRIN On!");
+//        UPrintf(USART1,"PWRIN On! plug in\r\n");
     }
     else if ((PWRIN_READ == 0) && (last_power_in == 1))
     {
@@ -556,7 +567,7 @@ void Tick_1000ms_check_power (void)
         turn_off_led (LED_CHARG_AND_LOWBAT_GPIO, LED_CHARG_AND_LOWBAT_PIN);
         xSystem_para_now.is_charging = 0;
         last_power_in = 0;
-//        UPrintf(USART1,"\rPWRIN Off!");
+//        UPrintf(USART1,"PWRIN Off! plug out\r\n");
     }
 }
 
