@@ -30,8 +30,10 @@
 #include "apm32f00x_misc.h"
 #include "Hardware.h"
 #include "parameter_define.h"
+#include "apm32f00x_wwdt.h"
 
 extern sys_parameter xSystem_para_now;
+extern volatile uint32_t m_delay;
 
  /*!
   * @brief       This function handles NMI exception
@@ -101,6 +103,14 @@ void SysTick_Handler(void)
     xSystem_para_now.Tick.Tick_1000ms++;
     xSystem_para_now.Tick.Tick_200ms++;
     xSystem_para_now.Tick.Tick_10ms++;
+    xSystem_para_now.Tick.Tick_1ms++;
+    
+    if (m_delay)
+    {
+        m_delay--;
+    }
+    
+
 }
 
 

@@ -38,11 +38,16 @@
 #include "light_control.h"
 #include "IR_Handler.h"
 #include "uart.h"
+#include "apm32f00x_wwdt.h"
 
 /* system para */
 sys_parameter xSystem_para_now;
-
-
+volatile uint32_t m_delay = 0;
+uint8_t ADC_arr [15];
+/** WWDT counter */
+#define WWDT_COUNTER_VALUE          (122)
+/** WWDT window value */
+#define WWDT_WINDOW_VALUE           (100)
 
 
 void Tick_100ms_Handler (void);
@@ -156,7 +161,19 @@ int main(void)
 {
     /* Setup SysTick Timer for 1 msec interrupts */
     SysTick_Config(RCM_GetMasterClockFreq() / 1000);
-    delay_time_1ms (10000);
+    delay_time_1ms (8000);
+    /**
+    WWDT Clock = 48MHZ;
+    Watchdog Window     = (WWDT_COUNTER_VALUE - 63) * 1 step
+                        = (122 - 63) * (12288 / 48)
+                        =~ 15ms
+
+    Non Allowed Window  = (WWDT_COUNTER_VALUE - WWDT_WINDOW_VALUE) * 1 step
+                        = (122 - 90) * (12288 / 48)
+                        =~ 5.6ms
+    */
+    WWDT_Config(WWDT_COUNTER_VALUE, WWDT_WINDOW_VALUE);
+    WWDT_SetCounter(WWDT_COUNTER_VALUE);
     uint32_t freqLIRC;
     freqLIRC = LIRCMeasurment();
     IWDTInit(freqLIRC);
@@ -178,12 +195,27 @@ int main(void)
     xSystem_para_now.BT1.thresh = 1;
     xSystem_para_now.BT2.thresh = 1;
     xSystem_para_now.BT3.thresh = 1;
-   
+    
+    WWDT_SetCounter(WWDT_COUNTER_VALUE);
+    xSystem_para_now.Tick.Tick_1ms = 0;
     while(1)
     {
+        if (xSystem_para_now.Tick.Tick_1ms > 10) // (15.1 - 5.6)
+        {
+            xSystem_para_now.Tick.Tick_1ms = 0;
+            WWDT_SetCounter(WWDT_COUNTER_VALUE);
+        } 
 //        static uint8_t i = 0;
         IWDT_ReloadCounter();
+           
         
+        if (xSystem_para_now.Tick.Tick_10ms >= 500)
+        {
+            xSystem_para_now.Tick.Tick_10ms = 0;
+            static uint8_t i = 0;
+            ADC_arr[i++] = xSystem_para_now.Vbat;
+            if (i == 15) i = 0;
+        }
         if((xSystem_para_now.Tick.Tick_100ms >= 100) && (xSystem_para_now.in_sleep_mode == 0)) // only check if not in sleep mode
         {
             //for wdt test
@@ -199,7 +231,6 @@ int main(void)
         
         if(xSystem_para_now.Tick.Tick_1000ms >= 1000){
             xSystem_para_now.Tick.Tick_1000ms = 0;
-            //Check_Tick_1000ms();
             Tick_1000ms_check_power();
 //            UPrintf(USART1,"Still run On!");
         }
@@ -229,38 +260,9 @@ int main(void)
                 }
             }
             
-//            if (xSystem_para_now.is_charging == 0)
-//            {
-//                turn_off_led (LED_CHARG_AND_LOWBAT_GPIO, LED_CHARG_AND_LOWBAT_PIN);
-//            }
-//            else
-//            {
-//                turn_on_led (LED_CHARG_AND_LOWBAT_GPIO, LED_CHARG_AND_LOWBAT_PIN);
-//            }
         }
     }
 }
-
-
-//void check_wake_up_event (void)
-//{
-//    if ((xSystem_para_now.BT1.level == 1) || (xSystem_para_now.IrCode == IR_SPEED))
-//    {
-//        if (xSystem_para_now.Vbat > 9600)
-//        {
-//            xSystem_para_now.in_sleep_mode = 0;
-//            init_system_default ();
-//            turn_on_led (LED_SWING_GPIO, LED_SWING_PIN);
-//            //init gpio again
-//        }
-//        else
-//        {
-//            toggle_led (LED_CHARG_AND_LOWBAT_GPIO,  LED_CHARG_AND_LOWBAT_PIN);
-//           
-//        }
-//    }
-//    
-//}
 
 
 void scan_button_on_board (void)
@@ -462,17 +464,29 @@ void Tick_1000ms_check_power (void)
     static uint8_t last_power_in = 0;
     static uint8_t ClkLowBat = 0, ClkFullBat = 0, ClkOutLowBatState = 0;
     uint32_t mVolOfBat;
-
-    mVolOfBat = 500 * xSystem_para_now.Vbat /4095;
+    uint8_t divider = 0;
+    static uint16_t Vbat_avr;
+    for (uint8_t i = 0; i < 15; i++)
+    {
+        Vbat_avr += ADC_arr[i];
+        if (ADC_arr[i] == 0)
+        {
+            divider = i;
+            break;
+        }
+        divider = i;
+    }
+    Vbat_avr = Vbat_avr / divider;
+    mVolOfBat = 500 * Vbat_avr /4095;
     mVolOfBat = mVolOfBat * 431 / 100;
 
 //    UPrintf(USART1,"VBat: %d~%d.%dV, -> mVbat: %d\r\n",xSystem_para_now.Vbat, mVolOfBat/100,mVolOfBat/10%10, mVolOfBat);
     
     if ((mVolOfBat <= 956) && (xSystem_para_now.is_charging == 0) && (xSystem_para_now.in_sleep_mode == 0)) //9v6 and not charging
     {
-        if (++ClkLowBat > 5)
+        if (++ClkLowBat > 7)
         {
-            if(ClkLowBat > 7) ClkLowBat = 7;
+            if(ClkLowBat > 9) ClkLowBat = 9;
             xSystem_para_now.in_sleep_mode = 1;
             xSystem_para_now.BT1.level = 0;
             xSystem_para_now.BT2.level = 0;
@@ -542,11 +556,6 @@ void Tick_1000ms_check_power (void)
                         turn_off_led (LED_FULLBAT_GPIO, LED_FULLBAT_PIN);
                         turn_on_led (LED_CHARG_AND_LOWBAT_GPIO, LED_CHARG_AND_LOWBAT_PIN);
                     }
-//                    else
-//                    {
-//                        xSystem_para_now.is_charging = 0;
-//                        turn_off_led (LED_CHARG_AND_LOWBAT_GPIO, LED_CHARG_AND_LOWBAT_PIN);
-//                    }
                 }                
             }
         }
@@ -572,19 +581,19 @@ void Tick_1000ms_check_power (void)
 }
 
 /*
-    delay_1ms  with clock 24MHz
+    delay_1ms
 */
 void delay_time_1ms(uint32_t count)
 {
-    while (count--)
+    m_delay = count;
+    while (m_delay)
     {
-        for (uint8_t j = 0; j < 50; j++)
+        if (WWDT_ReadCounter() >= WWDT_WINDOW_VALUE)
         {
-           for (uint8_t i = 0; i < 12; i++)
-           {
-               IWDT_ReloadCounter();
-           }
+           WWDT_SetCounter(WWDT_COUNTER_VALUE);
         }
+       
+        IWDT_ReloadCounter();
     }
     
 }
