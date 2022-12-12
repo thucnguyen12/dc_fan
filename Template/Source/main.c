@@ -44,10 +44,11 @@
 sys_parameter xSystem_para_now;
 volatile uint32_t m_delay = 0;
 uint8_t ADC_arr [15];
+static uint8_t delay_called = 0;
 /** WWDT counter */
-#define WWDT_COUNTER_VALUE          (122)
+#define WWDT_COUNTER_VALUE          (124)
 /** WWDT window value */
-#define WWDT_WINDOW_VALUE           (100)
+#define WWDT_WINDOW_VALUE           (102)
 
 
 void Tick_100ms_Handler (void);
@@ -169,11 +170,10 @@ int main(void)
                         =~ 15ms
 
     Non Allowed Window  = (WWDT_COUNTER_VALUE - WWDT_WINDOW_VALUE) * 1 step
-                        = (122 - 90) * (12288 / 48)
+                        = (122 - 100) * (12288 / 48)
                         =~ 5.6ms
     */
-    WWDT_Config(WWDT_COUNTER_VALUE, WWDT_WINDOW_VALUE);
-    WWDT_SetCounter(WWDT_COUNTER_VALUE);
+    
     uint32_t freqLIRC;
     freqLIRC = LIRCMeasurment();
     IWDTInit(freqLIRC);
@@ -184,6 +184,7 @@ int main(void)
 //    UPrintf(USART1,"=====================\r\n");
 //	UPrintf(USART1,"AMP32F003 Started....\r\n");
 //	UPrintf(USART1,"=====================\r\n");
+    
     ADCInit();
     DC_Moto_Init();
     Light_PWM_Init();
@@ -196,13 +197,44 @@ int main(void)
     xSystem_para_now.BT2.thresh = 1;
     xSystem_para_now.BT3.thresh = 1;
     
-    WWDT_SetCounter(WWDT_COUNTER_VALUE);
+    for (uint8_t i = 0; i < 15; i++)
+    {
+        ADC_arr [i] = 0;
+    }
+    
+    WWDT_Config(WWDT_COUNTER_VALUE, WWDT_WINDOW_VALUE);
     xSystem_para_now.Tick.Tick_1ms = 0;
+    
     while(1)
     {
-        if (xSystem_para_now.Tick.Tick_1ms > 10) // (15.1 - 5.6)
+        if (delay_called)
+        {
+            delay_called = 0;
+            xSystem_para_now.Tick.Tick_1ms = 0;
+        }
+        if (xSystem_para_now.Tick.Tick_1ms > 12)//&& (xSystem_para_now.Tick.Tick_1ms < 15)) // (15.1 - 5.6)
         {
             xSystem_para_now.Tick.Tick_1ms = 0;
+//            static uint8_t i = 0;
+//            i++;
+//            if (i == 200)
+//            {
+//                i = 0;
+//                toggle_led (LED_LOW_SPD_GPIO, LED_LOW_SPD_PIN);
+//            }
+            
+//            if (WWDT_ReadCounter() >= WWDT_WINDOW_VALUE)
+//            {
+//                turn_on_led (LED_SWING_GPIO, LED_SWING_PIN);
+//                turn_off_led (LED_NATURAL_GPIO, LED_NATURAL_PIN);
+//            }
+//            else
+//            {
+//                turn_on_led (LED_NATURAL_GPIO, LED_NATURAL_PIN);
+//                WWDT_SetCounter(WWDT_COUNTER_VALUE);
+//            }
+//           
+//            while(WWDT_ReadCounter() >= WWDT_WINDOW_VALUE);
             WWDT_SetCounter(WWDT_COUNTER_VALUE);
         } 
 //        static uint8_t i = 0;
@@ -464,20 +496,20 @@ void Tick_1000ms_check_power (void)
     static uint8_t last_power_in = 0;
     static uint8_t ClkLowBat = 0, ClkFullBat = 0, ClkOutLowBatState = 0;
     uint32_t mVolOfBat;
-    uint8_t divider = 0;
-    static uint16_t Vbat_avr;
-    for (uint8_t i = 0; i < 15; i++)
-    {
-        Vbat_avr += ADC_arr[i];
-        if (ADC_arr[i] == 0)
-        {
-            divider = i;
-            break;
-        }
-        divider = i;
-    }
-    Vbat_avr = Vbat_avr / divider;
-    mVolOfBat = 500 * Vbat_avr /4095;
+//    uint8_t divider = 0;
+//    static uint16_t Vbat_avr;
+//    for (uint8_t i = 0; i < 15; i++)
+//    {
+//        Vbat_avr += ADC_arr[i];
+//        if (ADC_arr[i] == 0)
+//        {
+//            divider = i;
+//            break;
+//        }
+//        divider = i;
+//    }
+//    Vbat_avr = Vbat_avr / divider;
+    mVolOfBat = 500 * xSystem_para_now.Vbat /4095;
     mVolOfBat = mVolOfBat * 431 / 100;
 
 //    UPrintf(USART1,"VBat: %d~%d.%dV, -> mVbat: %d\r\n",xSystem_para_now.Vbat, mVolOfBat/100,mVolOfBat/10%10, mVolOfBat);
@@ -578,6 +610,11 @@ void Tick_1000ms_check_power (void)
         last_power_in = 0;
 //        UPrintf(USART1,"PWRIN Off! plug out\r\n");
     }
+    
+    if (xSystem_para_now.is_charging == 1)
+    {
+        toggle_led (LED_CHARG_AND_LOWBAT_GPIO, LED_CHARG_AND_LOWBAT_PIN);
+    }
 }
 
 /*
@@ -585,15 +622,18 @@ void Tick_1000ms_check_power (void)
 */
 void delay_time_1ms(uint32_t count)
 {
+    delay_called = 1;
     m_delay = count;
     while (m_delay)
     {
-        if (WWDT_ReadCounter() >= WWDT_WINDOW_VALUE)
+        if (WWDT_ReadCounter() < WWDT_WINDOW_VALUE)
         {
            WWDT_SetCounter(WWDT_COUNTER_VALUE);
         }
        
         IWDT_ReloadCounter();
     }
-    
+    xSystem_para_now.Tick.Tick_1ms = 0;
+    while(WWDT_ReadCounter() >= WWDT_WINDOW_VALUE);
+    WWDT_SetCounter(WWDT_COUNTER_VALUE);
 }
