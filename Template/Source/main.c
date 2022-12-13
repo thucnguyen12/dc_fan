@@ -39,12 +39,15 @@
 #include "IR_Handler.h"
 #include "uart.h"
 #include "apm32f00x_wwdt.h"
+#include "control_led.h"
 
 /* system para */
 sys_parameter xSystem_para_now;
 volatile uint32_t m_delay = 0;
-uint8_t ADC_arr [15];
-static uint8_t delay_called = 0;
+static uint16_t ADC_arr [15];
+//static uint8_t delay_called = 0;
+uint8_t first_time_ADC = 0;
+uint8_t ADC_started = 0;
 /** WWDT counter */
 #define WWDT_COUNTER_VALUE          (124)
 /** WWDT window value */
@@ -197,50 +200,58 @@ int main(void)
     xSystem_para_now.BT2.thresh = 1;
     xSystem_para_now.BT3.thresh = 1;
     
-    for (uint8_t i = 0; i < 15; i++)
-    {
-        ADC_arr [i] = 0;
-    }
     
-    WWDT_Config(WWDT_COUNTER_VALUE, WWDT_WINDOW_VALUE);
+    
+//    WWDT_Config(WWDT_COUNTER_VALUE, WWDT_WINDOW_VALUE);
     xSystem_para_now.Tick.Tick_1ms = 0;
+    
     
     while(1)
     {
-        if (delay_called)
+        led_status_control();
+        if (first_time_ADC)
         {
-            delay_called = 0;
-            xSystem_para_now.Tick.Tick_1ms = 0;
+            first_time_ADC = 0;
+            for (uint8_t i = 0; i < 15; i++)
+            {
+                ADC_arr [i] = xSystem_para_now.Vbat;
+            }
+            ADC_started = 1;
         }
-        if (xSystem_para_now.Tick.Tick_1ms > 12)//&& (xSystem_para_now.Tick.Tick_1ms < 15)) // (15.1 - 5.6)
-        {
-            xSystem_para_now.Tick.Tick_1ms = 0;
-//            static uint8_t i = 0;
-//            i++;
-//            if (i == 200)
-//            {
-//                i = 0;
-//                toggle_led (LED_LOW_SPD_GPIO, LED_LOW_SPD_PIN);
-//            }
-            
-//            if (WWDT_ReadCounter() >= WWDT_WINDOW_VALUE)
-//            {
-//                turn_on_led (LED_SWING_GPIO, LED_SWING_PIN);
-//                turn_off_led (LED_NATURAL_GPIO, LED_NATURAL_PIN);
-//            }
-//            else
-//            {
-//                turn_on_led (LED_NATURAL_GPIO, LED_NATURAL_PIN);
-//                WWDT_SetCounter(WWDT_COUNTER_VALUE);
-//            }
-//           
-//            while(WWDT_ReadCounter() >= WWDT_WINDOW_VALUE);
-            WWDT_SetCounter(WWDT_COUNTER_VALUE);
-        } 
+//        if (delay_called)
+//        {
+//            delay_called = 0;
+//            xSystem_para_now.Tick.Tick_1ms = 0;
+//        }
+//        if (xSystem_para_now.Tick.Tick_1ms > 12)//&& (xSystem_para_now.Tick.Tick_1ms < 15)) // (15.1 - 5.6)
+//        {
+//            xSystem_para_now.Tick.Tick_1ms = 0;
+////            static uint8_t i = 0;
+////            i++;
+////            if (i == 200)
+////            {
+////                i = 0;
+////                toggle_led (LED_LOW_SPD_GPIO, LED_LOW_SPD_PIN);
+////            }
+//            
+////            if (WWDT_ReadCounter() >= WWDT_WINDOW_VALUE)
+////            {
+////                turn_on_led (LED_SWING_GPIO, LED_SWING_PIN);
+////                turn_off_led (LED_NATURAL_GPIO, LED_NATURAL_PIN);
+////            }
+////            else
+////            {
+////                turn_on_led (LED_NATURAL_GPIO, LED_NATURAL_PIN);
+////                WWDT_SetCounter(WWDT_COUNTER_VALUE);
+////            } 
+////           
+////            while(WWDT_ReadCounter() >= WWDT_WINDOW_VALUE);
+////            WWDT_SetCounter(WWDT_COUNTER_VALUE);
+//        } 
 //        static uint8_t i = 0;
         IWDT_ReloadCounter();
            
-        
+        //read adc
         if (xSystem_para_now.Tick.Tick_10ms >= 500)
         {
             xSystem_para_now.Tick.Tick_10ms = 0;
@@ -248,6 +259,7 @@ int main(void)
             ADC_arr[i++] = xSystem_para_now.Vbat;
             if (i == 15) i = 0;
         }
+        
         if((xSystem_para_now.Tick.Tick_100ms >= 100) && (xSystem_para_now.in_sleep_mode == 0)) // only check if not in sleep mode
         {
             //for wdt test
@@ -261,7 +273,8 @@ int main(void)
             Tick_100ms_Handler ();
         }
         
-        if(xSystem_para_now.Tick.Tick_1000ms >= 1000){
+        if((xSystem_para_now.Tick.Tick_1000ms >= 1000) && ADC_started)
+        {
             xSystem_para_now.Tick.Tick_1000ms = 0;
             Tick_1000ms_check_power();
 //            UPrintf(USART1,"Still run On!");
@@ -284,11 +297,11 @@ int main(void)
                     xSystem_para_now.BT2.level = 0;
                     xSystem_para_now.BT3.level = 0;
                     
-                    // blink led low baterry 3 time
                     turn_off_led (LED_FULLBAT_GPIO, LED_FULLBAT_PIN);
-                    turn_on_led (LED_CHARG_AND_LOWBAT_GPIO, LED_CHARG_AND_LOWBAT_PIN);
-                    delay_time_1ms (1000);
-                    turn_off_led (LED_CHARG_AND_LOWBAT_GPIO, LED_CHARG_AND_LOWBAT_PIN);
+                    led_on_time(1000, 1);
+//                    turn_on_led (LED_CHARG_AND_LOWBAT_GPIO, LED_CHARG_AND_LOWBAT_PIN);
+//                    delay_time_1ms (800);
+//                    turn_off_led (LED_CHARG_AND_LOWBAT_GPIO, LED_CHARG_AND_LOWBAT_PIN);
                 }
             }
             
@@ -496,25 +509,23 @@ void Tick_1000ms_check_power (void)
     static uint8_t last_power_in = 0;
     static uint8_t ClkLowBat = 0, ClkFullBat = 0, ClkOutLowBatState = 0;
     uint32_t mVolOfBat;
-//    uint8_t divider = 0;
-//    static uint16_t Vbat_avr;
-//    for (uint8_t i = 0; i < 15; i++)
-//    {
-//        Vbat_avr += ADC_arr[i];
-//        if (ADC_arr[i] == 0)
-//        {
-//            divider = i;
-//            break;
-//        }
-//        divider = i;
-//    }
-//    Vbat_avr = Vbat_avr / divider;
-    mVolOfBat = 500 * xSystem_para_now.Vbat /4095;
-    mVolOfBat = mVolOfBat * 431 / 100;
+    static uint32_t Vbat_avr = 0;
+    Vbat_avr = 0;
+    for (uint8_t i = 0; i < 15; i++)
+    {
+        Vbat_avr += (uint32_t)ADC_arr[i];
+        
+    }
+    
+    Vbat_avr = Vbat_avr / 15;
+    mVolOfBat = 500 * Vbat_avr /4095;
+    mVolOfBat = mVolOfBat * 431 / 100;    
+
+
 
 //    UPrintf(USART1,"VBat: %d~%d.%dV, -> mVbat: %d\r\n",xSystem_para_now.Vbat, mVolOfBat/100,mVolOfBat/10%10, mVolOfBat);
     
-    if ((mVolOfBat <= 956) && (xSystem_para_now.is_charging == 0) && (xSystem_para_now.in_sleep_mode == 0)) //9v6 and not charging
+    if ((mVolOfBat <= 965) && (xSystem_para_now.is_charging == 0) && (xSystem_para_now.in_sleep_mode == 0)) //9v6 and not charging
     {
         if (++ClkLowBat > 7)
         {
@@ -533,18 +544,18 @@ void Tick_1000ms_check_power (void)
             turn_off_led (LED_SWING_GPIO, LED_SWING_PIN);
             
             turn_off_led (LED_FULLBAT_GPIO, LED_FULLBAT_PIN);
-            turn_on_led (LED_CHARG_AND_LOWBAT_GPIO, LED_CHARG_AND_LOWBAT_PIN);
-            delay_time_1ms (1000);
-            toggle_led (LED_CHARG_AND_LOWBAT_GPIO, LED_CHARG_AND_LOWBAT_PIN);
-            delay_time_1ms (1000);
-            toggle_led (LED_CHARG_AND_LOWBAT_GPIO, LED_CHARG_AND_LOWBAT_PIN);
-            delay_time_1ms (1000);
-            toggle_led (LED_CHARG_AND_LOWBAT_GPIO, LED_CHARG_AND_LOWBAT_PIN);
-            delay_time_1ms (1000);
-            toggle_led (LED_CHARG_AND_LOWBAT_GPIO, LED_CHARG_AND_LOWBAT_PIN);
-            delay_time_1ms (1000);
-            toggle_led (LED_CHARG_AND_LOWBAT_GPIO, LED_CHARG_AND_LOWBAT_PIN);
-            
+            led_on_time (1000, 5);
+//            turn_on_led (LED_CHARG_AND_LOWBAT_GPIO, LED_CHARG_AND_LOWBAT_PIN);
+//            delay_time_1ms (800);
+//            toggle_led (LED_CHARG_AND_LOWBAT_GPIO, LED_CHARG_AND_LOWBAT_PIN);
+//            delay_time_1ms (800);
+//            toggle_led (LED_CHARG_AND_LOWBAT_GPIO, LED_CHARG_AND_LOWBAT_PIN);
+//            delay_time_1ms (800);
+//            toggle_led (LED_CHARG_AND_LOWBAT_GPIO, LED_CHARG_AND_LOWBAT_PIN);
+//            delay_time_1ms (800);
+//            toggle_led (LED_CHARG_AND_LOWBAT_GPIO, LED_CHARG_AND_LOWBAT_PIN);
+//            delay_time_1ms (800);
+//            toggle_led (LED_CHARG_AND_LOWBAT_GPIO, LED_CHARG_AND_LOWBAT_PIN);
         }
     }
     else
@@ -597,7 +608,7 @@ void Tick_1000ms_check_power (void)
     if ((PWRIN_READ !=0) && (last_power_in == 0))
     {
         turn_off_led (LED_FULLBAT_GPIO, LED_FULLBAT_PIN);
-        turn_on_led (LED_CHARG_AND_LOWBAT_GPIO, LED_CHARG_AND_LOWBAT_PIN);
+        turn_off_led (LED_CHARG_AND_LOWBAT_GPIO, LED_CHARG_AND_LOWBAT_PIN);
         xSystem_para_now.is_charging = 1;
         last_power_in = 1;
 //        UPrintf(USART1,"PWRIN On! plug in\r\n");
@@ -613,7 +624,7 @@ void Tick_1000ms_check_power (void)
     
     if (xSystem_para_now.is_charging == 1)
     {
-        toggle_led (LED_CHARG_AND_LOWBAT_GPIO, LED_CHARG_AND_LOWBAT_PIN);
+        toggle_led (LED_FULLBAT_GPIO, LED_FULLBAT_PIN);
     }
 }
 
@@ -622,18 +633,10 @@ void Tick_1000ms_check_power (void)
 */
 void delay_time_1ms(uint32_t count)
 {
-    delay_called = 1;
+//    delay_called = 1;
     m_delay = count;
     while (m_delay)
     {
-        if (WWDT_ReadCounter() < WWDT_WINDOW_VALUE)
-        {
-           WWDT_SetCounter(WWDT_COUNTER_VALUE);
-        }
-       
         IWDT_ReloadCounter();
     }
-    xSystem_para_now.Tick.Tick_1ms = 0;
-    while(WWDT_ReadCounter() >= WWDT_WINDOW_VALUE);
-    WWDT_SetCounter(WWDT_COUNTER_VALUE);
 }

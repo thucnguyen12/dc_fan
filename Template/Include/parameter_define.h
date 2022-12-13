@@ -34,6 +34,12 @@ typedef struct
 
 typedef struct
 {
+    uint8_t toggle_time;
+    uint32_t led_counter;
+} led_control_t;
+
+typedef struct
+{
     SYST_ET 	SystemStatus;
     uint16_t    Vbat;
     uint8_t     in_sleep_mode;
@@ -45,6 +51,7 @@ typedef struct
     button_t    BT2;
     button_t    BT3;
     uint16_t	IrCode;
+    led_control_t led;
 } sys_parameter;
 
 extern sys_parameter xSystem_para_now;

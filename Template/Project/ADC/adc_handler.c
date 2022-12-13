@@ -1,5 +1,6 @@
 #include "adc_handler.h"
-
+extern uint8_t first_time_ADC;
+uint8_t this_is_first_time = 1;
 
 void ADCCalibration(void)
 {
@@ -85,6 +86,11 @@ void ADCIsr(void){
     if(ADC_ReadIntFlag(ADC_INT_FLAG_CC) == SET){
         ADC_ClearIntFlag(ADC_INT_FLAG_CC);
         xSystem_para_now.Vbat = ADC_ReadData(); // Vbat by mV
+    }
+    if (this_is_first_time == 1)
+    {
+        this_is_first_time = 0;
+        first_time_ADC = 1;
     }
 }
 
