@@ -171,7 +171,7 @@ void ProcessIRCode()
 	uint16_t	Code = 0;
 	/* Lay ma phim duoc bam */
 	Code = GetIRCommand();
-	UPrintf(USART1,"\rIR:%d.",Code);
+//	UPrintf(USART1,"\rIR:%d.",Code);
 	xSystem_para_now.IrCode = Code;
 }
 

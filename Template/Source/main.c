@@ -248,11 +248,10 @@ int main(void)
 ////            while(WWDT_ReadCounter() >= WWDT_WINDOW_VALUE);
 ////            WWDT_SetCounter(WWDT_COUNTER_VALUE);
 //        } 
-//        static uint8_t i = 0;
         IWDT_ReloadCounter();
            
         //read adc
-        if (xSystem_para_now.Tick.Tick_10ms >= 500)
+        if (xSystem_para_now.Tick.Tick_10ms >= 100)
         {
             xSystem_para_now.Tick.Tick_10ms = 0;
             static uint8_t i = 0;
@@ -260,7 +259,7 @@ int main(void)
             if (i == 15) i = 0;
         }
         
-        if((xSystem_para_now.Tick.Tick_100ms >= 100) && (xSystem_para_now.in_sleep_mode == 0)) // only check if not in sleep mode
+        if((xSystem_para_now.Tick.Tick_100ms >= 40) && (xSystem_para_now.in_sleep_mode == 0)) // only check if not in sleep mode
         {
             //for wdt test
 //            i++;
@@ -273,7 +272,7 @@ int main(void)
             Tick_100ms_Handler ();
         }
         
-        if((xSystem_para_now.Tick.Tick_1000ms >= 1000) && ADC_started)
+        if((xSystem_para_now.Tick.Tick_1000ms >= 400) && ADC_started)
         {
             xSystem_para_now.Tick.Tick_1000ms = 0;
             Tick_1000ms_check_power();
@@ -281,7 +280,7 @@ int main(void)
         }
         
 
-        if (xSystem_para_now.Tick.Tick_200ms >= 10)
+        if (xSystem_para_now.Tick.Tick_200ms >= 20)
         {
             xSystem_para_now.Tick.Tick_200ms = 0;
             if (xSystem_para_now.in_sleep_mode && (xSystem_para_now.is_charging == 0))
@@ -298,7 +297,8 @@ int main(void)
                     xSystem_para_now.BT3.level = 0;
                     
                     turn_off_led (LED_FULLBAT_GPIO, LED_FULLBAT_PIN);
-                    led_on_time(1000, 1);
+                    turn_on_led(LED_CHARG_AND_LOWBAT_GPIO, LED_CHARG_AND_LOWBAT_PIN);
+                    led_on_time(300, 1);
 //                    turn_on_led (LED_CHARG_AND_LOWBAT_GPIO, LED_CHARG_AND_LOWBAT_PIN);
 //                    delay_time_1ms (800);
 //                    turn_off_led (LED_CHARG_AND_LOWBAT_GPIO, LED_CHARG_AND_LOWBAT_PIN);
@@ -507,7 +507,8 @@ void Tick_100ms_Handler (void)
 void Tick_1000ms_check_power (void)
 {
     static uint8_t last_power_in = 0;
-    static uint8_t ClkLowBat = 0, ClkFullBat = 0, ClkOutLowBatState = 0;
+    //static uint8_t fullbat = 0;
+    static uint8_t ClkLowBat = 0, ClkFullBat = 0;//, ClkOutLowBatState = 0;
     uint32_t mVolOfBat;
     static uint32_t Vbat_avr = 0;
     Vbat_avr = 0;
@@ -523,13 +524,13 @@ void Tick_1000ms_check_power (void)
 
 
 
-//    UPrintf(USART1,"VBat: %d~%d.%dV, -> mVbat: %d\r\n",xSystem_para_now.Vbat, mVolOfBat/100,mVolOfBat/10%10, mVolOfBat);
+//    UPrintf(USART1,"VBat: %d~%d.%dV, -> mVbat: %d\r\n",Vbat_avr, mVolOfBat/100,mVolOfBat/10%10, mVolOfBat);
     
-    if ((mVolOfBat <= 965) && (xSystem_para_now.is_charging == 0) && (xSystem_para_now.in_sleep_mode == 0)) //9v6 and not charging
+    if ((mVolOfBat <= 956) && (xSystem_para_now.is_charging == 0) && (xSystem_para_now.in_sleep_mode == 0)) //9v6 and not charging
     {
-        if (++ClkLowBat > 7)
+        if (++ClkLowBat > 1)
         {
-            if(ClkLowBat > 9) ClkLowBat = 9;
+            if(ClkLowBat > 2) ClkLowBat = 2;
             xSystem_para_now.in_sleep_mode = 1;
             xSystem_para_now.BT1.level = 0;
             xSystem_para_now.BT2.level = 0;
@@ -544,7 +545,8 @@ void Tick_1000ms_check_power (void)
             turn_off_led (LED_SWING_GPIO, LED_SWING_PIN);
             
             turn_off_led (LED_FULLBAT_GPIO, LED_FULLBAT_PIN);
-            led_on_time (1000, 5);
+            turn_on_led(LED_CHARG_AND_LOWBAT_GPIO, LED_CHARG_AND_LOWBAT_PIN);
+            led_on_time (500, 4);
 //            turn_on_led (LED_CHARG_AND_LOWBAT_GPIO, LED_CHARG_AND_LOWBAT_PIN);
 //            delay_time_1ms (800);
 //            toggle_led (LED_CHARG_AND_LOWBAT_GPIO, LED_CHARG_AND_LOWBAT_PIN);
@@ -560,33 +562,28 @@ void Tick_1000ms_check_power (void)
     }
     else
     {
-        if (mVolOfBat >= 1050) // if (Vbat > 10,5V) or (Vbat > 9.6V and wakeup button pressed) then get out sleep mode
+        if (mVolOfBat >= 1051) // if (Vbat > 10,5V) or (Vbat > 9.6V and wakeup button pressed) then get out sleep mode
         {
-            if (++ClkOutLowBatState > 5)
-            {
-                //reset state low bat and finish sleep mode
-                ClkOutLowBatState = 0;
-                ClkLowBat = 0;
-                xSystem_para_now.in_sleep_mode = 0;
-            }
-            
+            ClkLowBat = 0;
+            xSystem_para_now.in_sleep_mode = 0;         
         }
         
-        if (mVolOfBat > 1420 && (xSystem_para_now.is_charging == 1)) // if v >14.4 and plug in
+        if (mVolOfBat > 1443 && (xSystem_para_now.is_charging == 1)) // if v >14.4 and plug in
         {
             if (PWRIN_READ != 0)
             {
-                if(++ClkFullBat > 20) {
-                    if(ClkFullBat > 25) 
-                        ClkFullBat = 25;
+                if(++ClkFullBat > 1) {
+                    if(ClkFullBat > 3) 
+                      ClkFullBat = 3;
 //                    UPrintf (USART1, " BATERRY IS FULL NOW\r\n");
                     xSystem_para_now.is_charging = 0; // BATERRY IS FULL
+//                    fullbat = 1;
                     turn_off_led (LED_CHARG_AND_LOWBAT_GPIO, LED_CHARG_AND_LOWBAT_PIN);
                     turn_on_led (LED_FULLBAT_GPIO, LED_FULLBAT_PIN); //LED GREEN INDICATE FULL BAT ALWAYS ON
                 }
             }
         }
-        else if (mVolOfBat < 1420)
+        else if (mVolOfBat < 1443)
         {
             if (ClkFullBat > 0)
             {
@@ -596,8 +593,6 @@ void Tick_1000ms_check_power (void)
                     {
 //                        UPrintf(USART1,"PLUG IN AND BATERRY IS NOT FULL!\r\n");
                         xSystem_para_now.is_charging = 1; // PLUG IN AND BATERRY IS NOT FULL
-                        turn_off_led (LED_FULLBAT_GPIO, LED_FULLBAT_PIN);
-                        turn_on_led (LED_CHARG_AND_LOWBAT_GPIO, LED_CHARG_AND_LOWBAT_PIN);
                     }
                 }                
             }
@@ -619,6 +614,7 @@ void Tick_1000ms_check_power (void)
         turn_off_led (LED_CHARG_AND_LOWBAT_GPIO, LED_CHARG_AND_LOWBAT_PIN);
         xSystem_para_now.is_charging = 0;
         last_power_in = 0;
+//        fullbat = 0;
 //        UPrintf(USART1,"PWRIN Off! plug out\r\n");
     }
     
